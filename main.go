@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -12,6 +13,39 @@ const localhost = "http://localhost:8080/chain"
 
 func main() {
 	fmt.Println(Hash(Block{"123", "456", []byte("test data"), time.Now()}))
+
+	typ := os.Getenv("TYPE")
+	if typ != "MASTER" && typ != "CLIENT" {
+		panic("TYPE MUST BE MASTER OR CLIENT!!!!!!!")
+	}
+
+	if typ == "MASTER" {
+		NewMaster()
+	} else {
+		for {
+			chain, err := GetChain(*http.DefaultClient)
+			if err != nil {
+				fmt.Println("GetChain err: ", err)
+				continue
+			}
+
+			parent := chain[len(chain)-1]
+			err = AddBlock(*http.DefaultClient, []Block{
+				{
+					ID:        Hash(parent),
+					ParentID:  parent.ID,
+					Data:      []byte("abooshk!!!"),
+					Timestamp: time.Now(),
+				},
+			})
+			if err != nil {
+				fmt.Println("AddBlock err: ", err)
+				continue
+			}
+
+			time.Sleep(time.Second)
+		}
+	}
 
 	NewMaster()
 }
@@ -36,6 +70,6 @@ func GetChain(c http.Client) (Chain, error) {
 	}
 	dec := json.NewDecoder(resp.Body)
 	var chain Chain
-	err = dec.Decode(chain)
+	err = dec.Decode(&chain)
 	return chain, err
 }
