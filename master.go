@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -9,11 +10,13 @@ func NewMaster() {
 
 	chain := Chain{}
 
+	ch := NewChain(&chain)
+
 	rootBlock := Block{
 		ID: "1234",
 	}
 
-	chain.Add(rootBlock)
+	ch.Add(rootBlock)
 
 	id := Hash(rootBlock)
 	secondBlock := Block{
@@ -21,12 +24,14 @@ func NewMaster() {
 		ParentID: rootBlock.ID,
 	}
 
-	chain.Add(secondBlock)
+	ch.Add(secondBlock)
+
+	fmt.Printf("%+v\n", ch)
 
 	r := gin.Default()
 
 	r.GET("/chain", func(c *gin.Context) {
-		c.JSON(200, chain)
+		c.JSON(200, ch.chain)
 	})
 
 	r.POST("/chain", func(c *gin.Context) {
