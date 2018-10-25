@@ -43,8 +43,8 @@ func NewMaster() {
 		json.Unmarshal(data, &blk)
 
 		for _, b := range blk {
-			bid := Hash(b)
-			tipId := ch.chain[len(ch.chain)-1].ID
+			bid := b.ID
+			tipId := Hash(ch.chain[len(ch.chain)-1])
 
 			if bid == tipId {
 				ch.Add(b)
