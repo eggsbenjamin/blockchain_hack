@@ -16,12 +16,9 @@ func main() {
 	NewMaster()
 }
 
-func AddBlock(c http.Client, b Block) error {
-	buff := bytes.NewReader{}
-	enc := json.NewEncoder(buff)
-	enc.Encode(b)
+func AddBlock(c http.Client, b []Block) error {
 	bJSON, _ := json.Marshal(b)
-	req, err := http.NewRequest(http.MethodPost, localhost, buff)
+	req, err := http.NewRequest(http.MethodPost, localhost, bytes.NewReader(bJSON))
 	resp, err := c.Do(req)
 	if resp.StatusCode != 200 {
 		return fmt.Errorf("received %d instead of 200", resp.StatusCode)
