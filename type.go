@@ -8,10 +8,10 @@ import (
 )
 
 type Block struct {
-	ID        string
-	ParentID  string
-	Data      []byte
-	Timestamp time.Time
+	ID        string    `json:"id"`
+	ParentID  string    `json:"parent_id"`
+	Data      []byte    `json:"data"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 func Hash(block Block) string {
@@ -32,6 +32,17 @@ func Hash(block Block) string {
 
 type Chain []Block
 
-func (c Chain) Add(block Block) error {
+type chainHolder struct {
+	chain Chain
+}
+
+func (c *chainHolder) Add(block Block) error {
+	c.chain = append(c.chain, block)
 	return nil
+}
+
+func NewChain(chain *Chain) *chainHolder {
+	return &chainHolder{
+		chain: *chain,
+	}
 }
