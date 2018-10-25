@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
+	"net/http"
 )
 
 func NewMaster() {
@@ -35,9 +38,23 @@ func NewMaster() {
 	})
 
 	r.POST("/chain", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
+		blk := []Block{}
+		data, _ := ioutil.ReadAll(c.Request.Body)
+		json.Unmarshal(data, &blk)
+
+		for _, b := range blk {
+			bid := Hash(b)
+			tipId := ch.chain[len(ch.chain)-1].ID
+
+			if bid == tipId {
+				ch.Add(b)
+			} else {
+				c.Status(http.StatusBadRequest)
+				return
+			}
+		}
+
+		c.Status(http.StatusOK)
 	})
 	r.Run()
 }
